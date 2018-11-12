@@ -5,20 +5,17 @@ import urllib.request
 import csv
 import numpy as np
 import pandas
+import validators
+
 #url = "https://forum.openrov.com/t/software-exploration-dds-and-the-trident-2/6891/9"
 #file = "open.csv"
 
+def position(content, num):
+        return content.find(r"<span itemprop='position'>#%s</span>" % num)
 
-def one_post(start, end, con_list, s):
-        page = s[start:end]
-        texts = re.findall('<p>(.*?)</p>', page, re.M|re.S)
-        t3 =''.join(texts)
-        t3=re.sub(r'src="(.*?)"', '', t3)
-        con_list.append(t3)
-        print(t3)
 
 def one_link_posts(file, url):
-
+    con_list = []
     with urllib.request.urlopen(url) as url:
         encoding = url.info().get_param('charset', 'utf8')
         s = url.read().decode(encoding)
@@ -26,27 +23,42 @@ def one_link_posts(file, url):
     title = re.findall(r'<title>(.*?)</title>', s)
     print(title[0])
 
-    times = re.findall(r'<time .*?>(.*?)</time>', s)
-    print(times)
-
     authors = re.findall(r'<b .*?>(.*?)</b>', s)
     print(authors)
 
-    con_list = []
-    if len(authors) > 1 :
-        for i in range(len(authors)-1):
-            start = s.find(r"<span itemprop='position'>#(i+1)</span>")
-            end = s.find(r"<span itemprop='position'>#(i+2)</span>")
-            one_post(start, end, con_list,s)
-        start = s.find(r"<span itemprop='position'>#n</span>")
-        end = s.find(r"<footer>")
-        one_post(start, end, con_list,s)
-    else:
-        start = s.find(r"<span itemprop='position'>#n</span>")
-        end = s.find(r"<footer>")
-        one_post(start, end, con_list,s)
+    #start = s.find(r"<span itemprop='position'>#%s</span>" % num)
+    #end = s.find(r"<span itemprop='position'>#%s</span>" % num)
 
-    pd = pandas.DataFrame(authors, con_list)
-    pd.to_csv("file")
+    for i in range(len(authors)):
 
-one_link_posts("open2.csv", "https://forum.openrov.com/t/software-exploration-dds-and-the-trident-2/6891/9")
+        start = position(s, i+1)
+        end = position(s, i+2)
+        print(1)
+        #one_post(start, end, con_list)
+        page = s[start:end]
+        print(2)
+        texts = re.findall(r'<p>(.*?)</p>', page, re.M|re.S)
+
+        print(3)
+        t3 =''.join(texts)
+        t3=re.sub(r'src="(.*?)"', '', t3)
+        con_list.append(t3)
+        print(4)
+        print(t3)
+
+    with open(file, 'a') as f:
+
+        writer = csv.writer(f)
+        writer.writerow(title)
+        writer.writerow(url)
+        writer.writerows(zip(authors, con_list))
+        print("writing...")
+
+with open("results.csv", 'r') as f:
+    for row in f:
+        url = row.split(',')[1]
+        if(validators.url(url)):
+            print(url)
+            one_link_posts("open3.csv", url)
+        else:
+            continue
