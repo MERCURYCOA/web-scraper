@@ -42,6 +42,6 @@ with open("results_2.csv", 'r') as f:
         url = row.split(',')[1]
         if(validators.url(url)):
             print(url)
-            page_content("bs_support.csv", url)
+            page_content("support.csv", url)
         else:
             continue
