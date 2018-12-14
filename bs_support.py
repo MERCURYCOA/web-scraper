@@ -32,16 +32,19 @@ def page_content(file, url):
 
     with open(file, 'a') as f:
                 writer = csv.writer(f)
-                writer.writerow([url])
-                writer.writerow([title])
-                writer.writerows(pair_list)
+                # writer.writerow([url])
+                # writer.writerow([title])
+                writer.writerow(time_l)
+                writer.writerow(" ")
+                # writer.writerows(pair_list)
                 print("writing...")
 
-with open("results_2.csv", 'r') as f:
+with open("hello_1.csv", 'r') as f:
     for row in f:
-        url = row.split(',')[1]
+        url = row.split(',')[0]
+        # url = row[0]
         if(validators.url(url)):
             print(url)
-            page_content("support.csv", url)
+            page_content("hello_1_time.csv", url)
         else:
             continue
