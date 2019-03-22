@@ -1,71 +1,43 @@
-# coding:utf-8
-#
-#
-#
-#
-# python3 open_general_content.py
-import re
-import urllib
-import urllib.request
+import urllib.request as urllib2
+import bs4
+from bs4 import BeautifulSoup
 import csv
-import numpy as np
-import pandas
 import validators
 
-#url = "https://forum.openrov.com/t/software-exploration-dds-and-the-trident-2/6891/9"
-#file = "open.csv"
+#source_page = "https://forum.openrov.com/t/issue-connecting-openrov-2-8-to-laptop/6567"
+def page_content(file, url):
+
+    page = urllib2.urlopen(url)
+    soup = BeautifulSoup(page, 'html.parser')
+    print(soup.get_text())
+    
+    loc_l
+    location = soup.find_all('h3', class_='location-and-website')
+    lines = [loc.get_text() for loc in location]
+    for line in lines:
+        loc_l.append(line)
+        
+
+    joint = soup.find_all('span', {class_: 'relative-date date'})[0].text
+    seen = soup.find_all('span', {class_: 'relative-date date'})[2].text
 
 
-def position(content, num):
-    return content.find(r"<span itemprop='position'>#%s</span>" % num)
-
-
-def one_link_posts(file, url):
-    con_list = []
-    with urllib.request.urlopen(url) as url:
-        encoding = url.info().get_param('charset', 'utf8')
-        s = url.read().decode(encoding)
-
-    title = re.findall(r'<title>(.*?)</title>', s)
-    print(title[0])
-
-    authors = re.findall(r'<b .*?>(.*?)</b>', s)
-    print(authors)
-
-    # start = s.find(r"<span itemprop='position'>#%s</span>" % num)
-    # end = s.find(r"<span itemprop='position'>#%s</span>" % num)
-
-    for i in range(len(authors)):
-
-        start = position(s, i+1)
-        end = position(s, i+2)
-        print(1)
-        #one_post(start, end, con_list)
-        page = s[start:end]
-        print(2)
-        texts = re.findall(r'<p>(.*?)</p>', page, re.M | re.S)
-
-        print(3)
-        t3 = ''.join(texts)
-        t3 = re.sub(r'src="(.*?)"', '', t3)
-        con_list.append(t3)
-        print(4)
-        print(t3)
 
     with open(file, 'a') as f:
+                writer = csv.writer(f)
+                # writer.writerow([url])
+                # writer.writerow([title])
+                writer.writerow(loc_l)
+                writer.writerow(" ")
+                # writer.writerows(pair_list)
+                print("writing...")
 
-        writer = csv.writer(f)
-        writer.writerow(title)
-        writer.writerow(url)
-        writer.writerows(zip(authors, con_list))
-        print("writing...")
-
-
-with open("userLinks.csv", 'r') as f:
+with open("userPost.csv", 'r') as f:
     for row in f:
-        url = row.split(',')[1]
+        url = row.split(',')[0]
+        url = row[0]
         if(validators.url(url)):
             print(url)
-            one_link_posts("userPost.csv", url)
+            page_content("userLinks.csv", url)
         else:
             continue
